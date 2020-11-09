@@ -160,6 +160,12 @@ current environment in order to have faster feedback. Run from Pylint root direc
 
     python tests/test_functional.py
 
+You can use all the options you would use for pytest, for example `-k "test_functional[len_checks]"`.
+It is also possible to update the expected output instead of using it for comparison, by appending
+`--update-functional-output` to the command line::
+
+    python tests/test_functional.py --update-functional-output -k "test_functional[len_checks]"
+
 .. _`Closing issues via commit messages`: https://help.github.com/articles/closing-issues-via-commit-messages/
 .. _`About pull requests`: https://help.github.com/articles/using-pull-requests/
 .. _tox: https://tox.readthedocs.io/en/latest/

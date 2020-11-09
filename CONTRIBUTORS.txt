@@ -425,3 +425,7 @@ contributors:
 * Giuseppe Valente: contributor
 
 * Raphael Gaschignard: contributor
+
+* Takashi Hirashima: contributor
+
+* Joffrey Mander: contributor

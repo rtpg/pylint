@@ -25,6 +25,8 @@ import csv
 import io
 import os
 import sys
+import warnings
+from pathlib import Path
 
 import pytest
 
@@ -47,11 +49,12 @@ csv.register_dialect("test", test_dialect)
 # TODOs
 #  - implement exhaustivity tests
 
-# If message files should be updated instead of checked.
-UPDATE = False
+UPDATE = Path("pylint-functional-test-update")
 
 
 class LintModuleOutputUpdate(testutils.LintModuleTest):
+    """If message files should be updated instead of checked."""
+
     def _open_expected_file(self):
         try:
             return super()._open_expected_file()
@@ -63,8 +66,14 @@ class LintModuleOutputUpdate(testutils.LintModuleTest):
             return
         emitted, remaining = self._split_lines(expected_messages, expected_lines)
         if emitted != received_lines:
+
             remaining.extend(received_lines)
             remaining.sort(key=lambda m: (m[1], m[0], m[3]))
+            warnings.warn(
+                "Updated '{}' with the new content generated from '{}'".format(
+                    self._test_file.expected_output, self._test_file.base
+                )
+            )
             with open(self._test_file.expected_output, "w") as fobj:
                 writer = csv.writer(fobj, dialect="test")
                 for line in remaining:
@@ -95,7 +104,7 @@ TESTS_NAMES = [t.base for t in TESTS]
 def test_functional(test_file):
     LintTest = (
         LintModuleOutputUpdate(test_file)
-        if UPDATE
+        if UPDATE.exists()
         else testutils.LintModuleTest(test_file)
     )
     LintTest.setUp()
@@ -103,7 +112,9 @@ def test_functional(test_file):
 
 
 if __name__ == "__main__":
-    if "-u" in sys.argv:
-        UPDATE = True
-        sys.argv.remove("-u")
+    if testutils.UPDATE_OPTION in sys.argv:
+        UPDATE.touch()
+        sys.argv.remove(testutils.UPDATE_OPTION)
     pytest.main(sys.argv)
+    if UPDATE.exists():
+        UPDATE.unlink()

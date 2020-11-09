@@ -34,7 +34,6 @@ import csv
 import functools
 import itertools
 import operator
-import os
 import platform
 import re
 import sys
@@ -58,6 +57,7 @@ from pylint.utils import ASTWalker
 SYS_VERS_STR = "%d%d%d" % sys.version_info[:3]
 TITLE_UNDERLINES = ["", "=", "-", "."]
 PREFIX = abspath(dirname(__file__))
+UPDATE_OPTION = "--update-functional-output"
 
 
 def _get_tests_info(input_dir, msg_dir, prefix, suffix):
@@ -627,9 +627,14 @@ class LintModuleTest:
         expected_lines = self._split_lines(expected_messages, expected_lines)[0]
         for exp, rec in itertools.zip_longest(expected_lines, received_lines):
             assert exp == rec, (
-                "Expected test lines did not match for test: {}."
-                "{_linesep:s}Expected : {}"
-                "{_linesep:s}Received : {}".format(
-                    self._test_file.base, exp, rec, _linesep=os.linesep
+                "Wrong output for '{_file}.txt':\n"
+                "You can update the expected output automatically with: '"
+                'python tests/test_functional.py {update_option} -k "test_functional[{_file}]"\'\n\n'
+                "Expected : {expected}\n"
+                "Received : {received}".format(
+                    update_option=UPDATE_OPTION,
+                    expected=exp,
+                    received=rec,
+                    _file=self._test_file.base,
                 )
             )
